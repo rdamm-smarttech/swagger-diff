@@ -24,6 +24,7 @@ public class SlackRender implements Render {
     final String LI = "* ";
     final String HR = "\n";
     final String PING = "<!here>";
+    final String BREAKING_CHANGE = "Breaking Change: ";
 
     public SlackRender() {}
 
@@ -93,7 +94,7 @@ public class SlackRender implements Render {
     }
 
     private void appendDeprecatedBody(StringBuffer sb, String ol_miss) {
-        sb.append(ol_miss).append("\n");
+        sb.append(BREAKING_CHANGE).append("\n").append(ol_miss).append("\n");
     }
 
     private void appendChangedHeader(StringBuffer sb) {
@@ -146,11 +147,11 @@ public class SlackRender implements Render {
 
                 StringBuffer ul_detail = new StringBuffer();
                 if (changedOperation.isDiffParam()) {
-                    ul_detail.append(TAB).append("Parameters")
+                    ul_detail.append(TAB).append(BREAKING_CHANGE).append("Parameters")
                             .append(ul_param(changedOperation));
                 }
                 if (changedOperation.isDiffProp()) {
-                    ul_detail.append(TAB).append("Return Type")
+                    ul_detail.append(TAB).append(BREAKING_CHANGE).append("Return Type")
                             .append(ul_response(changedOperation));
                 }
                 if (changedOperation.isDiffProduces()) {
@@ -158,7 +159,7 @@ public class SlackRender implements Render {
                             .append(ul_produce(changedOperation));
                 }
                 if (changedOperation.isDiffConsumes()) {
-                    ul_detail.append(TAB).append("Consumes")
+                    ul_detail.append(TAB).append(BREAKING_CHANGE).append("Consumes")
                             .append(ul_consume(changedOperation));
                 }
                 sb.append(LI).append(ITALIC_START).append(method).append(ITALIC_END)
