@@ -46,6 +46,12 @@ public class CLITest {
         String[] argv = { "--help", "-v", "2.0", "-output-mode", "markdown" };
         JCommander.newBuilder().addObject(cli).build().parse(argv);
 
+        argv = new String[] { "--help", "-v", "2.0", "-output-mode", "slack" };
+        JCommander.newBuilder().addObject(cli).build().parse(argv);
+
+        argv = new String[] { "--help", "-v", "2.0", "-output-mode", "slack_webhook" };
+        JCommander.newBuilder().addObject(cli).build().parse(argv);
+
         argv = new String[] { "--help", "-v", "1.0", "-output-mode", "html" };
         JCommander.newBuilder().addObject(cli).build().parse(argv);
 
