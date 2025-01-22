@@ -20,6 +20,8 @@ swagger-diff.iml
 testDiff.html 
 testDiff.json 
 testDiff.md
+testDiffSlack.md
+testDiffSlackWebhook.json
 testDeprecatedApi.html
 testNewApi.html
 
