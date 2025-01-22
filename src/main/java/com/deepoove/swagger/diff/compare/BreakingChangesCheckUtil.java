@@ -1,82 +1,116 @@
 package com.deepoove.swagger.diff.compare;
 
+import java.util.HashMap;
+
 import com.deepoove.swagger.diff.SwaggerDiff;
+import com.deepoove.swagger.diff.model.BreakingDiff;
 import com.deepoove.swagger.diff.model.ChangedEndpoint;
 import com.deepoove.swagger.diff.model.ChangedOperation;
 import com.deepoove.swagger.diff.model.ChangedParameter;
 import com.deepoove.swagger.diff.model.ElProperty;
 
 import io.swagger.models.HttpMethod;
+import io.swagger.models.Operation;
 import io.swagger.models.parameters.Parameter;
 
 public class BreakingChangesCheckUtil {
 
-    public static boolean hasBreakingChanges(SwaggerDiff swaggerDiff) {
+    public static BreakingDiff findAllBreakingChanges(SwaggerDiff swaggerDiff) {
+        BreakingDiff breakingDiff = new BreakingDiff();
         if (!swaggerDiff.getMissingEndpoints().isEmpty()) {
-            return true;
+            breakingDiff.setMissingEndpoints(swaggerDiff.getMissingEndpoints());
         }
         for (ChangedEndpoint changedEndpoint : swaggerDiff.getChangedEndpoints()) {
-            if (hasBreakingChanges(changedEndpoint)) {
-                return true;
+            ChangedEndpoint breaking = filterBreakingChangesForChangedEndpoint(changedEndpoint);
+            if (breaking != null) {
+                breakingDiff.getChangedEndpoints().add(breaking);
             }
         }
-        return false;
+
+        if (breakingDiff.getMissingEndpoints().isEmpty() &&
+                breakingDiff.getChangedEndpoints().isEmpty()) {
+            return null;
+        }
+        return breakingDiff;
     }
 
-    public static boolean hasBreakingChanges(ChangedEndpoint changedEndpoint) {
+    private static ChangedEndpoint filterBreakingChangesForChangedEndpoint(ChangedEndpoint changedEndpoint) {
+        ChangedEndpoint breakingChangedEndpoint = new ChangedEndpoint();
+        breakingChangedEndpoint.setMissingOperations(new HashMap<HttpMethod, Operation>());
+        breakingChangedEndpoint.setChangedOperations(new HashMap<HttpMethod, ChangedOperation>());
+
         if (!changedEndpoint.getMissingOperations().isEmpty()) {
-            return true;
+            breakingChangedEndpoint.setMissingOperations(changedEndpoint.getMissingOperations());
         }
         for (HttpMethod httpMethod : changedEndpoint.getChangedOperations().keySet()) {
             ChangedOperation changedOperation = changedEndpoint.getChangedOperations().get(httpMethod);
-            if (hasBreakingChanges(changedOperation)) {
-                return true;
+            ChangedOperation breakingChangedOperation = filberBreakingChangesForChangedOperation(changedOperation);
+            if (breakingChangedOperation != null) {
+                breakingChangedEndpoint.getChangedOperations().put(httpMethod, breakingChangedOperation);
             }
         }
-        return false;
+        if (breakingChangedEndpoint.getChangedOperations().isEmpty() &&
+                breakingChangedEndpoint.getMissingOperations().isEmpty()) {
+            return null;
+        }
+        return breakingChangedEndpoint;
     }
 
-    public static boolean hasBreakingChanges(ChangedOperation changedOperation) {
+    private static ChangedOperation filberBreakingChangesForChangedOperation(ChangedOperation changedOperation) {
+        ChangedOperation breakingChangedOperation = new ChangedOperation();
+
         // Props (Return Type)
         if (!changedOperation.getMissingProps().isEmpty()) {
-            return true;
+            breakingChangedOperation.setMissingProps(changedOperation.getMissingProps());
         }
         for (ElProperty elProperty : changedOperation.getChangedProps()) {
             if (elProperty.isTypeChange() || elProperty.isRemovedEnums()) {
-                return true;
+                breakingChangedOperation.getChangedProps().add(elProperty);
             }
         }
 
         // Params
         for (Parameter parameter : changedOperation.getAddParameters()) {
-            if (parameter.getRequired() && !parameter.getAllowEmptyValue()) {
-                return true;
+            if (parameter.getRequired() && 
+                    (parameter.getAllowEmptyValue() != null && parameter.getAllowEmptyValue() == false)) {
+                breakingChangedOperation.getAddParameters().add(parameter);
             }
         }
         for (ChangedParameter changedParameter : changedOperation.getChangedParameter()) {
             Parameter leftParameter = changedParameter.getLeftParameter();
             Parameter rightParameter = changedParameter.getRightParameter();
             if (!leftParameter.getRequired() && rightParameter.getRequired()) {
-                return true;
+                breakingChangedOperation.getChangedParameter().add(changedParameter);
+                continue;
             }
             if (leftParameter.getRequired() &&
                     rightParameter.getRequired() &&
-                    leftParameter.getAllowEmptyValue() &&
-                    !rightParameter.getAllowEmptyValue()) {
-                return true;
+                    (leftParameter.getAllowEmptyValue() != null && leftParameter.getAllowEmptyValue() == true) &&
+                    (rightParameter.getAllowEmptyValue() == null || rightParameter.getAllowEmptyValue() == false)) {
+                breakingChangedOperation.getChangedParameter().add(changedParameter);
+                continue;
             }
         }
 
         // Consumes
         if (!changedOperation.getMissingConsumes().isEmpty()) {
-            return true;
+            breakingChangedOperation.setMissingConsumes(changedOperation.getMissingConsumes());
         }
 
         // Produces
         if (!changedOperation.getMissingProduces().isEmpty()) {
-            return true;
+            breakingChangedOperation.setMissingProduces(changedOperation.getMissingProduces());
         }
-        return false;
+
+        if (breakingChangedOperation.getMissingProps().isEmpty() &&
+                breakingChangedOperation.getChangedProps().isEmpty() &&
+                breakingChangedOperation.getAddParameters().isEmpty() &&
+                breakingChangedOperation.getChangedParameter().isEmpty() &&
+                breakingChangedOperation.getMissingConsumes().isEmpty() &&
+                breakingChangedOperation.getMissingProduces().isEmpty()) {
+            return null;
+        }
+        return breakingChangedOperation;
     }
     
 }

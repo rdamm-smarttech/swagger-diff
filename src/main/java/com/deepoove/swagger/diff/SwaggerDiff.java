@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.deepoove.swagger.diff.compare.BreakingChangesCheckUtil;
 import com.deepoove.swagger.diff.compare.SpecificationDiff;
+import com.deepoove.swagger.diff.model.BreakingDiff;
 import com.deepoove.swagger.diff.model.ChangedEndpoint;
 import com.deepoove.swagger.diff.model.Endpoint;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,6 +30,8 @@ public class SwaggerDiff {
     private List<Endpoint> newEndpoints;
     private List<Endpoint> missingEndpoints;
     private List<ChangedEndpoint> changedEndpoints;
+
+    private BreakingDiff breakingChanges;
 
     /**
      * compare two swagger 1.x doc
@@ -136,6 +139,7 @@ public class SwaggerDiff {
         this.newEndpoints = diff.getNewEndpoints();
         this.missingEndpoints = diff.getMissingEndpoints();
         this.changedEndpoints = diff.getChangedEndpoints();
+        this.breakingChanges = BreakingChangesCheckUtil.findAllBreakingChanges(this);
         return this;
     }
 
@@ -160,10 +164,14 @@ public class SwaggerDiff {
     }
 
     public boolean hasSameEndpoints() {
-        return this.newEndpoints.isEmpty() && this.missingEndpoints.isEmpty() && this.changedEndpoints.isEmpty();
+        return newEndpoints.isEmpty() && missingEndpoints.isEmpty() && changedEndpoints.isEmpty();
+    }
+
+    public BreakingDiff getBreakingChanges() {
+        return breakingChanges;
     }
 
     public boolean hasBreakingChanges() {
-        return BreakingChangesCheckUtil.hasBreakingChanges(this);
+        return breakingChanges.isBreaking();
     }
 }
