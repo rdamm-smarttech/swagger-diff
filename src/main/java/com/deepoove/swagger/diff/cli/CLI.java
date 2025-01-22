@@ -7,6 +7,7 @@ import com.deepoove.swagger.diff.output.HtmlRender;
 import com.deepoove.swagger.diff.output.JsonRender;
 import com.deepoove.swagger.diff.output.MarkdownRender;
 import com.deepoove.swagger.diff.output.Render;
+import com.deepoove.swagger.diff.output.RenderOptions;
 import com.deepoove.swagger.diff.output.SlackRender;
 import com.deepoove.swagger.diff.output.SlackWebhookRender;
 
@@ -46,6 +47,12 @@ public class CLI {
     @Parameter(names = "--version", description = "swagger-diff tool version", help = true, order = 6)
     private boolean v;
 
+    @Parameter(names = "-here", description = "prepend a @here (slack encoded) ping to beginning of output")
+    private boolean pingHere;
+
+    @Parameter(names = "-branch_title", description = "Add branch title to the output")
+    private String branchTitle;
+
     public static void main(String[] args) {
         CLI cli = new CLI();
         JCommander jCommander = JCommander.newBuilder()
@@ -69,7 +76,7 @@ public class CLI {
         SwaggerDiff diff = SwaggerDiff.SWAGGER_VERSION_V2.equals(version)
                 ? SwaggerDiff.compareV2(oldSpec, newSpec) : SwaggerDiff.compareV1(oldSpec, newSpec);
 
-        String render = getRender(outputMode).render(diff);
+        String render = getRender(outputMode).render(diff, new RenderOptions(pingHere, branchTitle));
         JCommander.getConsole().println(render);
     }
 

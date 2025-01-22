@@ -8,11 +8,11 @@ public class SlackWebhookRender extends SlackRender {
     final String MARKDOWN_TYPE = "mrkdwn";
 
     @Override
-    public String render(SwaggerDiff diff) {
+    public String render(SwaggerDiff diff, RenderOptions options) {
         if (hasNoChanges(diff)) {
             return NO_CHANGES_RENDER;
         }
-        String slackMarkdown = super.render(diff);
+        String slackMarkdown = super.render(diff, options);
         return formatSlackMarkdownForWebhook(slackMarkdown);
     }
 

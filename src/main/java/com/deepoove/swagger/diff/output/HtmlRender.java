@@ -29,7 +29,7 @@ public class HtmlRender implements Render {
     }
 
 
-    public String render(SwaggerDiff diff) {
+    public String render(SwaggerDiff diff, RenderOptions options) {
         List<Endpoint> newEndpoints = diff.getNewEndpoints();
         ContainerTag ol_newEndpoint = ol_newEndpoint(newEndpoints);
 

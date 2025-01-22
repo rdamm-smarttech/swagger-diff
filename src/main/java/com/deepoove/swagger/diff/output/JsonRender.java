@@ -6,7 +6,7 @@ import com.deepoove.swagger.diff.SwaggerDiff;
 public class JsonRender implements Render {
 
     @Override
-    public String render(SwaggerDiff diff) {
+    public String render(SwaggerDiff diff, RenderOptions options) {
         return JSON.toJSONString(diff);
     }
 }

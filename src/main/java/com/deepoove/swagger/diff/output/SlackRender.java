@@ -10,6 +10,7 @@ import com.deepoove.swagger.diff.model.*;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.Property;
+import org.apache.commons.lang3.StringUtils;
 
 public class SlackRender implements Render {
 
@@ -22,11 +23,12 @@ public class SlackRender implements Render {
     final String DOUBLE_TAB = "        ";
     final String LI = "* ";
     final String HR = "\n";
+    final String PING = "<!here>";
 
     public SlackRender() {}
 
     @Override
-    public String render(SwaggerDiff diff) {
+    public String render(SwaggerDiff diff, RenderOptions options) {
         if (hasNoChanges(diff)) {
             return NO_CHANGES_RENDER;
         }
@@ -38,13 +40,20 @@ public class SlackRender implements Render {
         String ol_missingEndpoint = ol_missingEndpoint(missingEndpoints);
         String ol_changed = ol_changed(changedEndpoints);
 
-        String slackMarkdown = renderSlackMarkdown(diff.getOldVersion(), diff.getNewVersion(), ol_newEndpoint, ol_missingEndpoint, ol_changed);
+        String slackMarkdown = renderSlackMarkdown(options.isPingHere(), options.getBranchName(), diff.getOldVersion(), diff.getNewVersion(),
+                ol_newEndpoint, ol_missingEndpoint, ol_changed);
         return slackMarkdown;
     }
 
-    public String renderSlackMarkdown(String oldVersion, String newVersion, String ol_new, String ol_miss,
+    public String renderSlackMarkdown(boolean isPingHere, String branchName, String oldVersion, String newVersion, String ol_new, String ol_miss,
                              String ol_changed) {
         StringBuffer sb = new StringBuffer();
+        if (isPingHere) {
+            appendPing(sb);
+        }
+        if (StringUtils.isNotEmpty(branchName)) {
+            appendBranchTitle(sb, branchName);
+        }
         appendVersionHeader(sb, oldVersion, newVersion);
         appendNewHeader(sb);
         appendNewBody(sb, ol_new);
@@ -57,6 +66,14 @@ public class SlackRender implements Render {
 
     protected boolean hasNoChanges(SwaggerDiff diff) {
         return diff.getNewEndpoints().isEmpty() && diff.getMissingEndpoints().isEmpty() && diff.getChangedEndpoints().isEmpty();
+    }
+
+    private void appendPing(StringBuffer sb) {
+        sb.append(PING).append(HR);
+    }
+
+    private void appendBranchTitle(StringBuffer sb, String branchName) {
+        sb.append(BOLD_START).append("Branch being used: " + branchName).append(BOLD_END).append(HR);
     }
 
     private void appendVersionHeader(StringBuffer sb, String oldVersion, String newVersion) {
