@@ -21,6 +21,7 @@ public class MarkdownRender implements Render {
     final String PRE_LI = "    ";
     final String LI = "* ";
     final String HR = "---\n";
+    final String BREAKING_CHANGE = "Breaking change: ";
 
     public MarkdownRender() {}
 
@@ -92,11 +93,11 @@ public class MarkdownRender implements Render {
 
                 StringBuffer ul_detail = new StringBuffer();
                 if (changedOperation.isDiffParam()) {
-                    ul_detail.append(PRE_LI).append("Parameters")
+                    ul_detail.append(PRE_LI).append(BREAKING_CHANGE).append("Parameters")
                             .append(ul_param(changedOperation));
                 }
                 if (changedOperation.isDiffProp()) {
-                    ul_detail.append(PRE_LI).append("Return Type")
+                    ul_detail.append(PRE_LI).append(BREAKING_CHANGE).append("Return Type")
                             .append(ul_response(changedOperation));
                 }
                 if (changedOperation.isDiffProduces()) {
