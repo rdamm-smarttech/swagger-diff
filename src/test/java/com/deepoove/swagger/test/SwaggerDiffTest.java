@@ -5,6 +5,8 @@ import com.deepoove.swagger.diff.model.*;
 import com.deepoove.swagger.diff.output.HtmlRender;
 import com.deepoove.swagger.diff.output.JsonRender;
 import com.deepoove.swagger.diff.output.MarkdownRender;
+import com.deepoove.swagger.diff.output.SlackRender;
+import com.deepoove.swagger.diff.output.SlackWebhookRender;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
@@ -186,6 +188,36 @@ public class SwaggerDiffTest {
 		try {
 			FileWriter fw = new FileWriter(
 					"testDiff.json");
+			fw.write(render);
+			fw.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testSlackRender() {
+		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC1, SWAGGER_V2_DOC2);
+		String render = new SlackRender().render(diff);
+		try {
+			FileWriter fw = new FileWriter(
+					"testDiffSlack.md");
+			fw.write(render);
+			fw.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testSlackWebhookRender() {
+		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC1, SWAGGER_V2_DOC2);
+		String render = new SlackWebhookRender().render(diff);
+		try {
+			FileWriter fw = new FileWriter(
+					"testDiffSlackWebhook.json");
 			fw.write(render);
 			fw.close();
 
