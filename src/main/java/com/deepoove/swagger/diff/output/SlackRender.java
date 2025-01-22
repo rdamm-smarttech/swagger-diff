@@ -24,7 +24,6 @@ public class SlackRender implements Render {
     final String LI = "* ";
     final String HR = "\n";
     final String PING = "<!here>";
-    final String BREAKING_CHANGE = "Breaking Change: ";
 
     public SlackRender() {}
 
@@ -37,18 +36,36 @@ public class SlackRender implements Render {
         List<Endpoint> newEndpoints = diff.getNewEndpoints();
         List<Endpoint> missingEndpoints = diff.getMissingEndpoints();
         List<ChangedEndpoint> changedEndpoints = diff.getChangedEndpoints();
+        BreakingDiff breakingDiff = diff.getBreakingChanges();
+
         String ol_newEndpoint = ol_newEndpoint(newEndpoints);
         String ol_missingEndpoint = ol_missingEndpoint(missingEndpoints);
         String ol_changed = ol_changed(changedEndpoints);
 
-        String slackMarkdown = renderSlackMarkdown(options.isPingHere(), options.getBranchName(), diff.getOldVersion(), diff.getNewVersion(),
-                ol_newEndpoint, ol_missingEndpoint, ol_changed);
+        String ol_breakingNewEndpoint = "";
+        String ol_breakingMissingEndpoint = ol_missingEndpoint(breakingDiff.getMissingEndpoints());
+        String ol_breakingChangedEndpoint = ol_changed(breakingDiff.getChangedEndpoints());
+
+        String slackMarkdown = renderSlackMarkdown(options.isPingHere(), options.getBranchName(), options.isBreakingSummary(), diff.getOldVersion(), diff.getNewVersion(),
+                ol_newEndpoint, ol_missingEndpoint, ol_changed, ol_breakingNewEndpoint, ol_breakingMissingEndpoint, ol_breakingChangedEndpoint);
         return slackMarkdown;
     }
 
-    public String renderSlackMarkdown(boolean isPingHere, String branchName, String oldVersion, String newVersion, String ol_new, String ol_miss,
-                             String ol_changed) {
+    public String renderSlackMarkdown(boolean isPingHere, String branchName, boolean isBreakingSummary, String oldVersion, String newVersion,
+                String ol_new, String ol_miss, String ol_changed, String ol_breakingNewEndpoint, String ol_breakingMissingEndpoint, String ol_breakingChangedEndpoint) {
         StringBuffer sb = new StringBuffer();
+        appendMainHeader(sb, isPingHere, branchName, oldVersion, newVersion);
+        if (isBreakingSummary) {
+            appendBreakingChangesHeader(sb);
+            appendBreakingChangesBody(sb, ol_breakingNewEndpoint, ol_breakingMissingEndpoint, ol_breakingChangedEndpoint);
+            appendBreakingChangesFooter(sb);
+            appendAllChangesHeader(sb);
+        }
+        appendAllChangesSummary(sb, ol_new, ol_miss, ol_changed);
+        return sb.toString();
+    }
+
+    private void appendMainHeader(StringBuffer sb, boolean isPingHere, String branchName, String oldVersion, String newVersion) {
         if (isPingHere) {
             appendPing(sb);
         }
@@ -56,13 +73,6 @@ public class SlackRender implements Render {
             appendBranchTitle(sb, branchName);
         }
         appendVersionHeader(sb, oldVersion, newVersion);
-        appendNewHeader(sb);
-        appendNewBody(sb, ol_new);
-        appendDeprecatedHeader(sb);
-        appendDeprecatedBody(sb, ol_miss);
-        appendChangedHeader(sb);
-        appendChangedBody(sb, ol_changed);
-        return sb.toString();
     }
 
     private void appendPing(StringBuffer sb) {
@@ -75,6 +85,37 @@ public class SlackRender implements Render {
 
     private void appendVersionHeader(StringBuffer sb, String oldVersion, String newVersion) {
         sb.append(BOLD_START).append("Version " + oldVersion + " to " + newVersion).append(BOLD_END).append("\n").append(HR);
+    }
+
+    private void appendBreakingChangesHeader(StringBuffer sb) {
+        sb.append(BOLD_START).append("Summary of Breaking Changes").append(BOLD_END).append(HR).append(HR);
+    }
+
+    private void appendBreakingChangesBody(StringBuffer sb, String ol_breakingNewEndpoint, String ol_breakingMissingEndpoint, String ol_breakingChangedEndpoint) {
+        appendAllChangesSummary(sb, ol_breakingNewEndpoint, ol_breakingMissingEndpoint, ol_breakingChangedEndpoint);
+    }
+
+    private void appendBreakingChangesFooter(StringBuffer sb) {
+        sb.append(HR).append(HR);
+    }
+
+    private void appendAllChangesHeader(StringBuffer sb) {
+        sb.append(BOLD_START).append("All Changes").append(BOLD_END).append(HR).append(HR);
+    }
+
+    private void appendAllChangesSummary(StringBuffer sb, String ol_new, String ol_miss, String ol_changed) {
+        if (!ol_new.isEmpty()) {
+            appendNewHeader(sb);
+            appendNewBody(sb, ol_new);
+        }
+        if (!ol_miss.isEmpty()) {
+            appendDeprecatedHeader(sb);
+            appendDeprecatedBody(sb, ol_miss);
+        }
+        if (!ol_changed.isEmpty()) {
+            appendChangedHeader(sb);
+            appendChangedBody(sb, ol_changed);
+        }
     }
 
     private void appendNewHeader(StringBuffer sb) {
@@ -90,7 +131,7 @@ public class SlackRender implements Render {
     }
 
     private void appendDeprecatedBody(StringBuffer sb, String ol_miss) {
-        sb.append(BREAKING_CHANGE).append("\n").append(ol_miss).append("\n");
+        sb.append(ol_miss).append("\n");
     }
 
     private void appendChangedHeader(StringBuffer sb) {
@@ -143,11 +184,11 @@ public class SlackRender implements Render {
 
                 StringBuffer ul_detail = new StringBuffer();
                 if (changedOperation.isDiffParam()) {
-                    ul_detail.append(TAB).append(BREAKING_CHANGE).append("Parameters")
+                    ul_detail.append(TAB).append("Parameters")
                             .append(ul_param(changedOperation));
                 }
                 if (changedOperation.isDiffProp()) {
-                    ul_detail.append(TAB).append(BREAKING_CHANGE).append("Return Type")
+                    ul_detail.append(TAB).append("Return Type")
                             .append(ul_response(changedOperation));
                 }
                 if (changedOperation.isDiffProduces()) {
@@ -155,7 +196,7 @@ public class SlackRender implements Render {
                             .append(ul_produce(changedOperation));
                 }
                 if (changedOperation.isDiffConsumes()) {
-                    ul_detail.append(TAB).append(BREAKING_CHANGE).append("Consumes")
+                    ul_detail.append(TAB).append("Consumes")
                             .append(ul_consume(changedOperation));
                 }
                 sb.append(LI).append(ITALIC_START).append(method).append(ITALIC_END)
