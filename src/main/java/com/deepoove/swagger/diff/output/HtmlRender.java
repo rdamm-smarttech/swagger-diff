@@ -18,6 +18,7 @@ public class HtmlRender implements Render {
 
     private String title;
     private String linkCss;
+    private final String BREAKING_CHANGES = "Breaking Change: ";
 
     public HtmlRender() {
         this("Api Change Log", "http://deepoove.com/swagger-diff/stylesheets/demo.css");
@@ -50,7 +51,8 @@ public class HtmlRender implements Render {
                 meta().withCharset("utf-8"),
                 title(title),
                 script(rawHtml("function showHide(id){if(document.getElementById(id).style.display==\'none\'){document.getElementById(id).style.display=\'block\';document.getElementById(\'btn_\'+id).innerHTML=\'&uArr;\';}else{document.getElementById(id).style.display=\'none\';document.getElementById(\'btn_\'+id).innerHTML=\'&dArr;\';}return true;}")).withType("text/javascript"),
-                link().withRel("stylesheet").withHref(linkCss)
+                link().withRel("stylesheet").withHref(linkCss),
+                link().withRel("stylesheet").withHref("/src/main/resources/demo.css")
             ),
             body().with(
                 header().with(h1(title)),
@@ -104,7 +106,7 @@ public class HtmlRender implements Render {
 
     private ContainerTag li_missingEndpoint(String method, String path,
                                             String desc) {
-        return li().with(span(method).withClass(method),
+        return li().with(span(BREAKING_CHANGES).withStyle("color: red"), span(method).withClass(method),
             del().withText(path)).with(span(null == desc ? "" : " " + desc));
     }
 
@@ -121,16 +123,16 @@ public class HtmlRender implements Render {
 
                 ContainerTag ul_detail = ul().withClass("detail");
                 if (changedOperation.isDiffParam()) {
-                    ul_detail.with(li().with(h3("Parameter")).with(ul_param(changedOperation)));
+                    ul_detail.with(li().with(span(BREAKING_CHANGES).withStyle("color: red"), h3("Parameter")).with(ul_param(changedOperation)));
                 }
                 if (changedOperation.isDiffProp()) {
-                    ul_detail.with(li().with(h3("Return Type")).with(ul_response(changedOperation)));
+                    ul_detail.with(li().with(span(BREAKING_CHANGES).withStyle("color: red"), h3("Return Type")).with(ul_response(changedOperation)));
                 }
                 if (changedOperation.isDiffProduces()) {
                     ul_detail.with(li().with(h3("Produces")).with(ul_produce(changedOperation)));
                 }
                 if (changedOperation.isDiffConsumes()) {
-                    ul_detail.with(li().with(h3("Consumes")).with(ul_consume(changedOperation)));
+                    ul_detail.with(li().with(span(BREAKING_CHANGES).withStyle("color: red"), h3("Consumes")).with(ul_consume(changedOperation)));
                 }
                 ol.with(li().with(span(method).withClass(method)).withText(pathUrl + " ").with(span(null == desc ? "" : desc))
                     .with(ul_detail));
