@@ -7,6 +7,8 @@ import com.deepoove.swagger.diff.output.HtmlRender;
 import com.deepoove.swagger.diff.output.JsonRender;
 import com.deepoove.swagger.diff.output.MarkdownRender;
 import com.deepoove.swagger.diff.output.Render;
+import com.deepoove.swagger.diff.output.SlackRender;
+import com.deepoove.swagger.diff.output.SlackWebhookRender;
 
 /**
  * $java -jar swagger-diff.jar -old http://www.petstore.com/swagger.json \n
@@ -19,6 +21,8 @@ import com.deepoove.swagger.diff.output.Render;
  */
 public class CLI {
 
+    private static final String OUTPUT_MODE_SLACK = "slack";
+    private static final String OUTPUT_MODE_SLACK_WEBHOOK = "slack_webhook";
     private static final String OUTPUT_MODE_MARKDOWN = "markdown";
     private static final String OUTPUT_MODE_JSON = "json";
 
@@ -32,8 +36,8 @@ public class CLI {
     @Regex("(2\\.0|1\\.0)")
     private String version = SwaggerDiff.SWAGGER_VERSION_V2;
 
-    @Parameter(names = "-output-mode", description = "render mode: markdown, html or json", validateWith = RegexValidator.class, order = 3)
-    @Regex("(markdown|html|json)")
+    @Parameter(names = "-output-mode", description = "render mode: markdown, html, json, slack or slack_webhook", validateWith = RegexValidator.class, order = 3)
+    @Regex("(markdown|html|json|slack|slack_webhook)")
     private String outputMode = OUTPUT_MODE_MARKDOWN;
 
     @Parameter(names = "--help", help = true, order = 5)
@@ -74,6 +78,10 @@ public class CLI {
             return new MarkdownRender();
         } else if (OUTPUT_MODE_JSON.equals(outputMode)) {
             return new JsonRender();
+        } else if (OUTPUT_MODE_SLACK.equals(outputMode)) {
+            return new SlackRender();
+        } else if (OUTPUT_MODE_SLACK_WEBHOOK.equals(outputMode)) {
+            return new SlackWebhookRender();
         }
         return new HtmlRender("Changelog", "http://deepoove.com/swagger-diff/stylesheets/demo.css");
     }
