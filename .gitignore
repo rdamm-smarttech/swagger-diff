@@ -24,3 +24,6 @@ testDeprecatedApi.html
 testNewApi.html
 
 *.DS_Store
+
+# API Files #
+/sample/
