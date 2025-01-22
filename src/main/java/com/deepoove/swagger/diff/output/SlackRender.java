@@ -30,7 +30,7 @@ public class SlackRender implements Render {
 
     @Override
     public String render(SwaggerDiff diff, RenderOptions options) {
-        if (hasNoChanges(diff)) {
+        if (diff.hasSameEndpoints()) {
             return NO_CHANGES_RENDER;
         }
 
@@ -63,10 +63,6 @@ public class SlackRender implements Render {
         appendChangedHeader(sb);
         appendChangedBody(sb, ol_changed);
         return sb.toString();
-    }
-
-    protected boolean hasNoChanges(SwaggerDiff diff) {
-        return diff.getNewEndpoints().isEmpty() && diff.getMissingEndpoints().isEmpty() && diff.getChangedEndpoints().isEmpty();
     }
 
     private void appendPing(StringBuffer sb) {

@@ -9,7 +9,7 @@ public class SlackWebhookRender extends SlackRender {
 
     @Override
     public String render(SwaggerDiff diff, RenderOptions options) {
-        if (hasNoChanges(diff)) {
+        if (diff.hasSameEndpoints()) {
             return NO_CHANGES_RENDER;
         }
         String slackMarkdown = super.render(diff, options);

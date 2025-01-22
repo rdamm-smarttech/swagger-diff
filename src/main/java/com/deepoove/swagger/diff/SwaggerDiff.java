@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.deepoove.swagger.diff.compare.BreakingChangesCheckUtil;
 import com.deepoove.swagger.diff.compare.SpecificationDiff;
 import com.deepoove.swagger.diff.model.ChangedEndpoint;
 import com.deepoove.swagger.diff.model.Endpoint;
@@ -156,5 +157,13 @@ public class SwaggerDiff {
 
     public String getNewVersion() {
         return newSpecSwagger.getInfo().getVersion();
+    }
+
+    public boolean hasSameEndpoints() {
+        return this.newEndpoints.isEmpty() && this.missingEndpoints.isEmpty() && this.changedEndpoints.isEmpty();
+    }
+
+    public boolean hasBreakingChanges() {
+        return BreakingChangesCheckUtil.hasBreakingChanges(this);
     }
 }
