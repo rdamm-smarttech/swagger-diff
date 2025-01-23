@@ -6,7 +6,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.deepoove.swagger.diff.compare.BreakingChangesCheckUtil;
 import com.deepoove.swagger.diff.compare.SpecificationDiff;
+import com.deepoove.swagger.diff.model.BreakingDiff;
 import com.deepoove.swagger.diff.model.ChangedEndpoint;
 import com.deepoove.swagger.diff.model.Endpoint;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,6 +30,8 @@ public class SwaggerDiff {
     private List<Endpoint> newEndpoints;
     private List<Endpoint> missingEndpoints;
     private List<ChangedEndpoint> changedEndpoints;
+
+    private BreakingDiff breakingChanges;
 
     /**
      * compare two swagger 1.x doc
@@ -135,6 +139,7 @@ public class SwaggerDiff {
         this.newEndpoints = diff.getNewEndpoints();
         this.missingEndpoints = diff.getMissingEndpoints();
         this.changedEndpoints = diff.getChangedEndpoints();
+        this.breakingChanges = BreakingChangesCheckUtil.findAllBreakingChanges(this);
         return this;
     }
 
@@ -156,5 +161,17 @@ public class SwaggerDiff {
 
     public String getNewVersion() {
         return newSpecSwagger.getInfo().getVersion();
+    }
+
+    public boolean hasSameEndpoints() {
+        return newEndpoints.isEmpty() && missingEndpoints.isEmpty() && changedEndpoints.isEmpty();
+    }
+
+    public BreakingDiff getBreakingChanges() {
+        return breakingChanges;
+    }
+
+    public boolean hasBreakingChanges() {
+        return breakingChanges.isBreaking();
     }
 }

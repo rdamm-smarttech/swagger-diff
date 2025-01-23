@@ -53,6 +53,9 @@ public class CLI {
     @Parameter(names = "-branch_title", description = "Add branch title to the output")
     private String branchTitle;
 
+    @Parameter(names = "-breaking_summary", description = "Add a summary of the breaking changes")
+    private boolean breakingSummary;
+
     public static void main(String[] args) {
         CLI cli = new CLI();
         JCommander jCommander = JCommander.newBuilder()
@@ -76,7 +79,7 @@ public class CLI {
         SwaggerDiff diff = SwaggerDiff.SWAGGER_VERSION_V2.equals(version)
                 ? SwaggerDiff.compareV2(oldSpec, newSpec) : SwaggerDiff.compareV1(oldSpec, newSpec);
 
-        String render = getRender(outputMode).render(diff, new RenderOptions(pingHere, branchTitle));
+        String render = getRender(outputMode).render(diff, new RenderOptions(pingHere, branchTitle, breakingSummary));
         JCommander.getConsole().println(render);
     }
 

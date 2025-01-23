@@ -9,7 +9,7 @@
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}",
-            "args": "-new sample/current_service.json -old sample/previous_service.json -output-mode slack_webhook"
+            "args": "-new target/test-classes/petstore_v2_1.json -old target/test-classes/petstore_v2_2.json -breaking_summary -output-mode slack"
         },
         {
             "type": "java",
