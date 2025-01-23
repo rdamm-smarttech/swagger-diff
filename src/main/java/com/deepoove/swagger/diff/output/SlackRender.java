@@ -45,17 +45,18 @@ public class SlackRender implements Render {
         String ol_breakingNewEndpoint = "";
         String ol_breakingMissingEndpoint = ol_missingEndpoint(breakingDiff.getMissingEndpoints());
         String ol_breakingChangedEndpoint = ol_changed(breakingDiff.getChangedEndpoints());
+        boolean hasBreakingChanges = !ol_breakingMissingEndpoint.isEmpty() || !ol_breakingChangedEndpoint.isEmpty();
 
-        String slackMarkdown = renderSlackMarkdown(options.isPingHere(), options.getBranchName(), options.isBreakingSummary(), diff.getOldVersion(), diff.getNewVersion(),
+        String slackMarkdown = renderSlackMarkdown(options.isPingHere(), options.getBranchName(), options.isBreakingSummary(), hasBreakingChanges, diff.getOldVersion(), diff.getNewVersion(),
                 ol_newEndpoint, ol_missingEndpoint, ol_changed, ol_breakingNewEndpoint, ol_breakingMissingEndpoint, ol_breakingChangedEndpoint);
         return slackMarkdown;
     }
 
-    public String renderSlackMarkdown(boolean isPingHere, String branchName, boolean isBreakingSummary, String oldVersion, String newVersion,
+    public String renderSlackMarkdown(boolean isPingHere, String branchName, boolean isBreakingSummary, boolean hasBreakingChanges, String oldVersion, String newVersion,
                 String ol_new, String ol_miss, String ol_changed, String ol_breakingNewEndpoint, String ol_breakingMissingEndpoint, String ol_breakingChangedEndpoint) {
         StringBuffer sb = new StringBuffer();
         appendMainHeader(sb, isPingHere, branchName, oldVersion, newVersion);
-        if (isBreakingSummary) {
+        if (isBreakingSummary && hasBreakingChanges) {
             appendBreakingChangesHeader(sb);
             appendBreakingChangesBody(sb, ol_breakingNewEndpoint, ol_breakingMissingEndpoint, ol_breakingChangedEndpoint);
             appendBreakingChangesFooter(sb);
