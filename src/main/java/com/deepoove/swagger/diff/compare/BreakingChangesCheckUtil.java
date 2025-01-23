@@ -26,11 +26,6 @@ public class BreakingChangesCheckUtil {
                 breakingDiff.getChangedEndpoints().add(breaking);
             }
         }
-
-        if (breakingDiff.getMissingEndpoints().isEmpty() &&
-                breakingDiff.getChangedEndpoints().isEmpty()) {
-            return null;
-        }
         return breakingDiff;
     }
 

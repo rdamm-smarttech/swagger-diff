@@ -45,9 +45,9 @@ public class SlackRender implements Render {
         String ol_changed = ol_changed(changedEndpoints);
 
         String ol_breakingNewEndpoint = "";
-        String ol_breakingMissingEndpoint = ol_missingEndpoint(breakingDiff.getMissingEndpoints());
-        String ol_breakingChangedEndpoint = ol_changed(breakingDiff.getChangedEndpoints());
-        boolean hasBreakingChanges = !ol_breakingMissingEndpoint.isEmpty() || !ol_breakingChangedEndpoint.isEmpty();
+        String ol_breakingMissingEndpoint = breakingDiff.isBreaking() ? ol_missingEndpoint(breakingDiff.getMissingEndpoints()) : "";
+        String ol_breakingChangedEndpoint = breakingDiff.isBreaking() ? ol_changed(breakingDiff.getChangedEndpoints()) : "";
+        boolean hasBreakingChanges = breakingDiff.isBreaking();
 
         String slackMarkdown = renderSlackMarkdown(options.isPingHere(), options.getBranchName(), options.isBreakingSummary(), hasBreakingChanges, diff.getOldVersion(), diff.getNewVersion(),
                 ol_newEndpoint, ol_missingEndpoint, ol_changed, ol_breakingNewEndpoint, ol_breakingMissingEndpoint, ol_breakingChangedEndpoint);
