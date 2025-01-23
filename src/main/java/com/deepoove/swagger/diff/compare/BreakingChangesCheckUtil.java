@@ -36,6 +36,8 @@ public class BreakingChangesCheckUtil {
 
     private static ChangedEndpoint filterBreakingChangesForChangedEndpoint(ChangedEndpoint changedEndpoint) {
         ChangedEndpoint breakingChangedEndpoint = new ChangedEndpoint();
+        breakingChangedEndpoint.setPathUrl(changedEndpoint.getPathUrl());
+        breakingChangedEndpoint.setNewOperations(changedEndpoint.getNewOperations());
         breakingChangedEndpoint.setMissingOperations(new HashMap<HttpMethod, Operation>());
         breakingChangedEndpoint.setChangedOperations(new HashMap<HttpMethod, ChangedOperation>());
 
@@ -58,6 +60,7 @@ public class BreakingChangesCheckUtil {
 
     private static ChangedOperation filberBreakingChangesForChangedOperation(ChangedOperation changedOperation) {
         ChangedOperation breakingChangedOperation = new ChangedOperation();
+        breakingChangedOperation.setSummary(changedOperation.getSummary());
 
         // Props (Return Type)
         if (!changedOperation.getMissingProps().isEmpty()) {
