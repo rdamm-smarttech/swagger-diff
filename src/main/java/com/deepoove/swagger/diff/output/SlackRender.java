@@ -19,6 +19,8 @@ public class SlackRender implements Render {
     final String BOLD_END = "*";
     final String ITALIC_START = "_";
     final String ITALIC_END = "_";
+    final String CODE_START = "`";
+    final String CODE_END = "`";
     final String TAB = "    ";
     final String DOUBLE_TAB = "        ";
     final String LI = "* ";
@@ -155,7 +157,7 @@ public class SlackRender implements Render {
 
     private String li_newEndpoint(String method, String path, String desc) {
         StringBuffer sb = new StringBuffer();
-        sb.append(LI).append(ITALIC_START).append(method).append(ITALIC_END)
+        sb.append(LI).append(CODE_START).append(method).append(CODE_END)
                 .append(" " + path).append(" " + desc + "\n");
         return sb.toString();
     }
@@ -200,7 +202,7 @@ public class SlackRender implements Render {
                     ul_detail.append(TAB).append("Consumes")
                             .append(ul_consume(changedOperation));
                 }
-                sb.append(LI).append(ITALIC_START).append(method).append(ITALIC_END)
+                sb.append(LI).append(CODE_START).append(method).append(CODE_END)
                         .append(" " + pathUrl).append(" " + desc + "  \n")
                         .append(ul_detail);
             }

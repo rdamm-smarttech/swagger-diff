@@ -23,8 +23,7 @@ public class SlackWebhookRender extends SlackRender {
 
     private String removeQuotes(String slackMarkdown) {
         return slackMarkdown.replace("'", "")
-                .replace("\"", "")
-                .replace("`", "");
+                .replace("\"", "");
     }
 
     private String wrapMarkdownTextInSlackJsonPayload(String slackMarkdown) {
