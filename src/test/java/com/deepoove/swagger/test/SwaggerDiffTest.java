@@ -33,6 +33,7 @@ public class SwaggerDiffTest {
 	public void testEqual() {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC2, SWAGGER_V2_DOC2);
 		assertEqual(diff);
+		assertNoBreakingChanges(diff);
 	}
 
 	@Test
@@ -57,7 +58,7 @@ public class SwaggerDiffTest {
 		Assert.assertTrue(newEndpoints.size() > 0);
 		Assert.assertTrue(missingEndpoints.isEmpty());
 		Assert.assertTrue(changedEndPoints.isEmpty());
-
+		assertNoBreakingChanges(diff);
 	}
 
 	@Test
@@ -82,7 +83,7 @@ public class SwaggerDiffTest {
 		Assert.assertTrue(newEndpoints.isEmpty());
 		Assert.assertTrue(missingEndpoints.size() > 0);
 		Assert.assertTrue(changedEndPoints.isEmpty());
-
+		assertBreakingChanges(diff);
 	}
 	
 	@Test
@@ -128,6 +129,7 @@ public class SwaggerDiffTest {
 
         SwaggerDiff diff = SwaggerDiff.compareV2Raw(rawJson, rawJson);
         assertEqual(diff);
+		assertNoBreakingChanges(diff);
     }
 
 
@@ -142,7 +144,7 @@ public class SwaggerDiffTest {
         Assert.assertTrue(newEndpoints.size() > 0);
         Assert.assertTrue(missingEndpoints.isEmpty());
         Assert.assertTrue(changedEndPoints.isEmpty());
-
+		assertNoBreakingChanges(diff);
     }
 
     @Test
@@ -155,6 +157,7 @@ public class SwaggerDiffTest {
         Assert.assertTrue(newEndpoints.isEmpty());
         Assert.assertTrue(missingEndpoints.size() > 0);
         Assert.assertTrue(changedEndPoints.isEmpty());
+		assertBreakingChanges(diff);
     }
 
 	@Test
@@ -164,6 +167,7 @@ public class SwaggerDiffTest {
 			JsonNode json = new ObjectMapper().readTree(inputStream);
 			SwaggerDiff diff = SwaggerDiff.compareV2(json, json);
 			assertEqual(diff);
+			assertNoBreakingChanges(diff);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -342,7 +346,14 @@ public class SwaggerDiffTest {
 		Assert.assertTrue(newEndpoints.isEmpty());
 		Assert.assertTrue(missingEndpoints.isEmpty());
 		Assert.assertTrue(changedEndPoints.isEmpty());
+	}
 
+	private void assertBreakingChanges(SwaggerDiff diff) {
+		Assert.assertTrue(diff.hasBreakingChanges());
+	}
+
+	private void assertNoBreakingChanges(SwaggerDiff diff) {
+		Assert.assertFalse(diff.hasBreakingChanges());
 	}
 
 }
