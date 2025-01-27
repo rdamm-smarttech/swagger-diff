@@ -42,7 +42,7 @@ public class HtmlDivRender implements Render {
 
     private String renderHtml(SwaggerDiff diff, ReportMetadata reportMetadata, RenderOptions renderOptions) {
         ContainerTag contents = div_mainWrapper(diff, reportMetadata, renderOptions);
-        return document().render() + contents.render();
+        return contents.render();
     }
 
     private ContainerTag div_mainWrapper(SwaggerDiff diff, ReportMetadata reportMetadata, RenderOptions renderOptions) {
