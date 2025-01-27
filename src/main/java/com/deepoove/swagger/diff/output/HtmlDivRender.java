@@ -19,15 +19,7 @@ import static j2html.TagCreator.*;
 
 public class HtmlDivRender implements Render {
 
-    private String title;
-
-    public HtmlDivRender() {
-        this("API Change Log");
-    }
-
-    public HtmlDivRender(String title) {
-        this.title = title;
-    }
+    public HtmlDivRender() {}
 
     @Override
     public String render(SwaggerDiff diff, RenderOptions options) {
@@ -53,10 +45,10 @@ public class HtmlDivRender implements Render {
         articleContents.add(div_headArticle("Versions", "versions", p_versions(diff.getOldVersion(), diff.getNewVersion())));
         if (reportMetadata.isHasBreakingChanges() && renderOptions.isBreakingSummary()) {
             articleContents.add(div_breakingChangesReport(diff));
+            articleContents.add(hr());
         }
         articleContents.add(div_allChangesReport(diff));
         ContainerTag wrapper = div().with(
-            h1(title),
             div().withClass("article").with(
                 articleContents
             )
@@ -66,7 +58,7 @@ public class HtmlDivRender implements Render {
     }
 
     private ContainerTag div_headArticle(final String title, final String type, final ContainerTag ol) {
-        return div().with(h2(title), hr(), ol);
+        return div().with(h2(title), ol);
     }
 
     private ContainerTag p_branchName(String branchName) {
@@ -91,12 +83,12 @@ public class HtmlDivRender implements Render {
                 breakingEndpoints.add(div_headArticle("Deprecated Methods", "deprecated", ol_missing));
             }
             if (!diff.getBreakingChanges().getChangedEndpoints().isEmpty()) {
-                ContainerTag ol_changed = ol_changed(diff.getBreakingChanges().getChangedEndpoints());
+                ContainerTag ol_changed = ol_changedEndpoint(diff.getBreakingChanges().getChangedEndpoints());
                 div_headArticle("Changed Methods", "changed", ol_changed);
             }
         }
         ContainerTag div = div().with(
-            h3("Summary of Breaking Changes:"),
+            h2("Summary of Breaking Changes:"),
             div().withClass("diff_report_breaking_changes").with(
                 breakingEndpoints
             )
@@ -107,9 +99,9 @@ public class HtmlDivRender implements Render {
     private ContainerTag div_allChangesReport(SwaggerDiff diff) {
         ContainerTag ol_new = ol_newEndpoint(diff.getNewEndpoints());
         ContainerTag ol_missing = ol_missingEndpoint(diff.getMissingEndpoints());
-        ContainerTag ol_changed = ol_changed(diff.getChangedEndpoints());
+        ContainerTag ol_changed = ol_changedEndpoint(diff.getChangedEndpoints());
         ContainerTag div = div().with(
-            h3("All Changes:"),
+            h2("All Changes:"),
             div().withClass("diff_report_all_changes").with(
                 div_headArticle("New Methods", "new", ol_new),
                 div_headArticle("Deprecated Methods", "deprecated", ol_missing),
@@ -131,7 +123,7 @@ public class HtmlDivRender implements Render {
 
     private ContainerTag li_newEndpoint(String method, String path,
                                         String desc) {
-        return li().with(span(method).withClass(method)).withText(path + " ")
+        return li().with(span(method + " ").withClass(method)).withText(path + " ")
             .with(span(null == desc ? "" : desc));
     }
 
@@ -147,11 +139,11 @@ public class HtmlDivRender implements Render {
 
     private ContainerTag li_missingEndpoint(String method, String path,
                                             String desc) {
-        return li().with(span(method).withClass(method),
-            del().withText(path)).with(span(null == desc ? "" : " " + desc));
+        return li().with(span(method + " ").withClass(method),
+            span().withText(path)).with(span(null == desc ? "" : " " + desc));
     }
 
-    private ContainerTag ol_changed(List<ChangedEndpoint> changedEndpoints) {
+    private ContainerTag ol_changedEndpoint(List<ChangedEndpoint> changedEndpoints) {
         if (null == changedEndpoints) return ol().withClass("diff_report_changed");
         ContainerTag ol = ol().withClass("diff_report_changed");
         for (ChangedEndpoint changedEndpoint : changedEndpoints) {
@@ -164,18 +156,18 @@ public class HtmlDivRender implements Render {
 
                 ContainerTag ul_detail = ul().withClass("detail");
                 if (changedOperation.isDiffParam()) {
-                    ul_detail.with(li().with(h3("Parameter")).with(ul_param(changedOperation)));
+                    ul_detail.with(li().with(h3("Parameter")).with(ul_param(changedOperation)).with(br()));
                 }
                 if (changedOperation.isDiffProp()) {
-                    ul_detail.with(li().with(h3("Return Type")).with(ul_response(changedOperation)));
+                    ul_detail.with(li().with(h3("Return Type")).with(ul_response(changedOperation)).with(br()));
                 }
                 if (changedOperation.isDiffProduces()) {
-                    ul_detail.with(li().with(h3("Produces")).with(ul_produce(changedOperation)));
+                    ul_detail.with(li().with(h3("Produces")).with(ul_produce(changedOperation)).with(br()));
                 }
                 if (changedOperation.isDiffConsumes()) {
-                    ul_detail.with(li().with(h3("Consumes")).with(ul_consume(changedOperation)));
+                    ul_detail.with(li().with(h3("Consumes")).with(ul_consume(changedOperation)).with(br()));
                 }
-                ol.with(li().with(span(method).withClass(method)).withText(pathUrl + " ").with(span(null == desc ? "" : desc))
+                ol.with(li().with(span(method + " ").withClass(method)).withText(pathUrl + " ").with(span(null == desc ? "" : desc))
                     .with(ul_detail));
             }
         }
@@ -201,7 +193,7 @@ public class HtmlDivRender implements Render {
 
     private ContainerTag li_missingProp(ElProperty prop) {
         Property property = prop.getProperty();
-        return li().withClass("missing").withText("Delete").with(del(prop.getEl())).with(span(null == property.getDescription() ? "" : ("//" + property.getDescription())).withClass("comment"));
+        return li().withClass("missing").withText("Delete ").with(span(prop.getEl())).with(span(null == property.getDescription() ? "" : ("//" + property.getDescription())).withClass("comment"));
     }
 
     private ContainerTag li_addProp(ElProperty prop) {
@@ -270,7 +262,7 @@ public class HtmlDivRender implements Render {
     }
 
     private ContainerTag li_missingParam(Parameter param) {
-        return li().withClass("missing").with(span("Delete")).with(del(param.getName())).with(span(null == param.getDescription() ? "" : ("//" + param.getDescription())).withClass("comment"));
+        return li().withClass("missing").with(span("Delete ")).with(span(param.getName())).with(span(null == param.getDescription() ? "" : ("//" + param.getDescription())).withClass("comment"));
     }
 
     private ContainerTag li_changedParam(ChangedParameter changeParam) {
@@ -283,7 +275,7 @@ public class HtmlDivRender implements Render {
             li.withText(" change into " + (rightParam.getRequired() ? "required" : "not required"));
         }
         if (changeDescription) {
-            li.withText(" Notes ").with(del(leftParam.getDescription()).withClass("comment")).withText(" change into ").with(span(span(null == rightParam.getDescription() ? "" : rightParam.getDescription()).withClass("comment")));
+            li.withText(" Notes ").with(span(leftParam.getDescription()).withClass("comment")).withText(" change into ").with(span(span(null == rightParam.getDescription() ? "" : rightParam.getDescription()).withClass("comment")));
         }
         return li;
     }
@@ -315,7 +307,7 @@ public class HtmlDivRender implements Render {
     }
 
     private ContainerTag li_missingMediaType(String type) {
-        return li().withClass("missing").withText("Delete").with(del(type)).with(span(""));
+        return li().withClass("missing").withText("Delete ").with(span(type)).with(span(""));
     }
 
     private ContainerTag li_addMediaType(String type) {
