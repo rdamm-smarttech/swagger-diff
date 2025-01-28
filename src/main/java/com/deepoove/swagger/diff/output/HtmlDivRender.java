@@ -48,7 +48,7 @@ public class HtmlDivRender implements Render {
             articleContents.add(hr());
         }
         articleContents.add(div_allChangesReport(diff));
-        ContainerTag wrapper = div().with(
+        ContainerTag wrapper = div().withClass("diff_report").with(
             div().withClass("article").with(
                 articleContents
             )
